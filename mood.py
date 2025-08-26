@@ -1,5 +1,4 @@
 from database import Database
-
 db = Database()
 
 def add_mood(user_id, emoji):
