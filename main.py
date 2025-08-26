@@ -30,10 +30,14 @@ async def start_handler(message: types.Message):
         InlineKeyboardButton("Mood Tracker", callback_data="mood"),
         InlineKeyboardButton("Product Reminder", callback_data="product"),
         InlineKeyboardButton("Daily Tip", callback_data="daily_tip"),
+        InlineKeyboardButton("AI Advice", callback_data="ai_advice"),  # AI button added
         InlineKeyboardButton("Quiz", callback_data="quiz"),
         InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
     )
-    await message.answer("👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:", reply_markup=keyboard)
+    await message.answer(
+        "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:",
+        reply_markup=keyboard
+    )
 
 # Callback query handler
 @dp.callback_query_handler(lambda c: True)
@@ -72,6 +76,10 @@ async def callback_handler(callback_query: types.CallbackQuery):
         tip = get_daily_tip()
         edu = get_educational_content()
         await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
+
+    elif data == "ai_advice":  # AI Advice callback
+        advice = get_ai_advice()
+        await bot.send_message(user_id, f"🤖 AI Advice:\n{advice}")
 
     elif data == "quiz":
         quiz = get_random_quiz()
