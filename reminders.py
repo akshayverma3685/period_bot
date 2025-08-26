@@ -15,5 +15,5 @@ def schedule_reminders(bot, db):
                     reminder_day = (next_period - timedelta(days=1)).strftime("%d-%m-%Y")
                     if today == reminder_day:
                         await send_reminder(bot, user['user_id'], "⏰ Reminder: Your period may start tomorrow!")
-            await asyncio.sleep(86400)  # Check once per day
+            await asyncio.sleep(86400)
     asyncio.create_task(scheduler())
