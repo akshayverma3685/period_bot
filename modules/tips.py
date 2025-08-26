@@ -1,24 +1,28 @@
 # modules/tips.py
 import random
 
+# Daily tips for menstrual health
 DAILY_TIPS = [
-    "Stay hydrated 💧",
-    "Do light exercises 🏃‍♀️",
-    "Meditate for 10 minutes 🧘‍♀️",
-    "Eat iron-rich food 🥦",
-    "Maintain a sleep schedule 💤"
+    "💧 Stay hydrated to ease cramps and bloating.",
+    "🥗 Include iron-rich foods like spinach and nuts in your diet.",
+    "🛌 Ensure at least 7-8 hours of sleep every night.",
+    "🏃 Gentle exercises like yoga or walking help relieve discomfort.",
+    "🧘‍♀️ Practice deep breathing or meditation for stress relief."
 ]
 
+# Educational facts
 EDUCATIONAL_CONTENT = [
-    "Menstrual cycles vary between 21-35 days.",
-    "Tracking your period helps understand fertility.",
-    "Mood swings are normal due to hormone changes.",
-    "Cramping can be relieved with gentle stretching.",
-    "Iron and protein intake is important during periods."
+    "📚 Menstrual cycles are usually 28 days but can vary between 21-35 days.",
+    "📚 PMS symptoms are normal and can include mood swings, cramps, and fatigue.",
+    "📚 Tracking your period helps in identifying irregularities early.",
+    "📚 Using menstrual cups is eco-friendly and can save money over time.",
+    "📚 Pain during periods can be reduced with heat therapy and light exercise."
 ]
 
-def get_daily_tip():
+def get_daily_tip() -> str:
+    """Return a random daily tip."""
     return random.choice(DAILY_TIPS)
 
-def get_educational_content():
+def get_educational_content() -> str:
+    """Return a random educational fact."""
     return random.choice(EDUCATIONAL_CONTENT)
