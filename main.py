@@ -4,14 +4,15 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
 from database import Database
 from reminders import schedule_reminders
-from tips import get_daily_tip
-from products import get_product_suggestions
+from tips import get_daily_tip, get_educational_content
+from products import get_product_suggestions, get_self_care_tips
 from mood import add_mood
 from utils import calculate_next_period
 from ai_module import get_ai_advice
+from quiz import get_random_quiz
+from report import generate_weekly_report
 
 API_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
-
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
@@ -28,20 +29,23 @@ async def start_handler(message: types.Message):
         InlineKeyboardButton("Next Period", callback_data="next_period"),
         InlineKeyboardButton("Symptoms / Tips", callback_data="symptoms"),
         InlineKeyboardButton("Mood Tracker", callback_data="mood"),
-        InlineKeyboardButton("Product Reminder", callback_data="product")
+        InlineKeyboardButton("Product Reminder", callback_data="product"),
+        InlineKeyboardButton("Daily Tip", callback_data="daily_tip"),
+        InlineKeyboardButton("Quiz", callback_data="quiz"),
+        InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
     )
-    await message.answer("👋 Welcome to the All-in-One Period Bot! Choose an option:", reply_markup=keyboard)
+    await message.answer("👋 Welcome to the Next-Level Period Bot! Choose an option:", reply_markup=keyboard)
 
 # Callback query handler
 @dp.callback_query_handler(lambda c: True)
 async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     data = callback_query.data
+    user = db.get_user(user_id)
     if data == "set_period":
         await bot.send_message(user_id, "Please send your last period date (DD-MM-YYYY)")
         db.set_state(user_id, "awaiting_period")
     elif data == "next_period":
-        user = db.get_user(user_id)
         if user.get('last_period') and user.get('cycle_length'):
             next_period = calculate_next_period(user['last_period'], user['cycle_length'])
             await bot.send_message(user_id, f"Your next period is expected on: {next_period}")
@@ -57,42 +61,20 @@ async def callback_handler(callback_query: types.CallbackQuery):
         await bot.send_message(user_id, "How's your mood today?", reply_markup=keyboard)
     elif data == "product":
         products = get_product_suggestions()
-        await bot.send_message(user_id, f"🛒 Recommended products:\n{products}")
-
-# Handle period input
-@dp.message_handler(lambda message: db.get_state(message.from_user.id) == "awaiting_period")
-async def period_input(message: types.Message):
-    user_id = message.from_user.id
-    try:
-        day, month, year = map(int, message.text.split('-'))
-        db.set_period(user_id, message.text)
-        await message.reply("✅ Last period date saved! Now set your cycle length using /setcycle command.")
-        db.set_state(user_id, None)
-    except:
-        await message.reply("❌ Invalid format! Use DD-MM-YYYY")
-
-# Handle symptoms input with free AI
-@dp.message_handler(lambda message: db.get_state(message.from_user.id) == "awaiting_symptoms")
-async def symptom_input(message: types.Message):
-    user_id = message.from_user.id
-    symptoms = message.text
-    user = db.get_user(user_id)
-    advice = get_ai_advice(symptoms=symptoms, cycle_info={'last_period': user['last_period'], 'cycle_length': user['cycle_length']})
-    await message.reply(f"💡 Personalized Advice:\n{advice}")
-    db.set_state(user_id, None)
-
-# Mood buttons
-@dp.callback_query_handler(lambda c: c.data.startswith('mood_'))
-async def mood_handler(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
-    emoji = callback_query.data.split("_")[1]
-    add_mood(user_id, emoji)
-    user = db.get_user(user_id)
-    advice = get_ai_advice(mood=emoji, cycle_info={'last_period': user['last_period'], 'cycle_length': user['cycle_length']})
-    await bot.send_message(user_id, f"Your mood {emoji} recorded!\n💡 Tip based on your mood:\n{advice}")
-
-# Start reminders scheduler
-schedule_reminders(bot, db)
-
-if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+        tips = get_self_care_tips()
+        await bot.send_message(user_id, f"🛒 Recommended products:\n{products}\n\nSelf-care tips:\n{tips}")
+    elif data == "daily_tip":
+        tip = get_daily_tip()
+        edu = get_educational_content()
+        await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
+    elif data == "quiz":
+        quiz = get_random_quiz()
+        options_keyboard = InlineKeyboardMarkup(row_width=1)
+        for opt in quiz['options']:
+            options_keyboard.insert(InlineKeyboardButton(opt, callback_data=f"quiz_{opt}_{quiz['answer']}"))
+        await bot.send_message(user_id, quiz['question'], reply_markup=options_keyboard)
+    elif data.startswith("quiz_"):
+        _, selected, answer = data.split("_")
+        if selected == answer:
+            await bot.send_message(user_id, "✅ Correct!")
+    else:
