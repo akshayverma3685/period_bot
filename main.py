@@ -17,7 +17,7 @@ API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(bot)
 
 db = Database('users.db')
 
@@ -106,4 +106,4 @@ async def callback_handler(callback_query: types.CallbackQuery):
 
 # Start polling
 if __name__ == "__main__":
-    asyncio.run(dp.start_polling())
+    asyncio.run(dp.start_polling(bot))
