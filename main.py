@@ -1,15 +1,15 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
-from database import Database
-from reminders import schedule_reminders
-from tips import get_daily_tip, get_educational_content
-from products import get_product_suggestions, get_self_care_tips
-from mood import add_mood
-from utils import calculate_next_period
-from ai_module import get_ai_advice
-from quiz import get_random_quiz
-from report import generate_weekly_report
+from modules.database import Database
+from modules.reminders import schedule_reminders
+from modules.tips import get_daily_tip, get_educational_content
+from modules.products import get_product_suggestions, get_self_care_tips
+from modules.mood import add_mood
+from modules.utils import calculate_next_period
+from modules.ai_module import get_ai_advice
+from modules.quiz import get_random_quiz
+from modules.report import generate_weekly_report
 import os
 import asyncio
 
