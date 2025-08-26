@@ -31,7 +31,7 @@ def home():
 # ---------------------------
 # Bot setup
 # ---------------------------
-API_TOKEN = "8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg"
+API_TOKEN = "8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXhXg"
 
 logging.basicConfig(level=logging.INFO)
 
