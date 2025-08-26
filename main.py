@@ -1,6 +1,10 @@
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+import os
+import asyncio
+import threading
 import logging
+from flask import Flask
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -10,54 +14,53 @@ from modules.utils import calculate_next_period
 from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
-import asyncio
 
-API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
+API_TOKEN = os.environ.get("API_TOKEN", "8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg")
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
-
 db = Database('users.db')
 
-# Start command
-@dp.message()
-async def start_handler(message: Message):
-    user_id = message.from_user.id
-    db.add_user(user_id)
-    
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton("Set Period", callback_data="set_period"),
-                InlineKeyboardButton("Next Period", callback_data="next_period")
-            ],
-            [
-                InlineKeyboardButton("Symptoms / Tips", callback_data="symptoms"),
-                InlineKeyboardButton("Mood Tracker", callback_data="mood")
-            ],
-            [
-                InlineKeyboardButton("Product Reminder", callback_data="product"),
-                InlineKeyboardButton("Daily Tip", callback_data="daily_tip")
-            ],
-            [
-                InlineKeyboardButton("AI Advice", callback_data="ai_advice"),
-                InlineKeyboardButton("Quiz", callback_data="quiz")
-            ],
-            [
-                InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
-            ]
-        ]
-    )
-    
-    await message.answer(
-        "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:",
-        reply_markup=keyboard
-    )
+# ===================== Bot Handlers =====================
 
-# Callback query handler
+@dp.message()
+async def start_handler(message: types.Message):
+    if message.text and message.text.lower() == "/start":
+        user_id = message.from_user.id
+        db.add_user(user_id)
+
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton("Set Period", callback_data="set_period"),
+                    InlineKeyboardButton("Next Period", callback_data="next_period")
+                ],
+                [
+                    InlineKeyboardButton("Symptoms / Tips", callback_data="symptoms"),
+                    InlineKeyboardButton("Mood Tracker", callback_data="mood")
+                ],
+                [
+                    InlineKeyboardButton("Product Reminder", callback_data="product"),
+                    InlineKeyboardButton("Daily Tip", callback_data="daily_tip")
+                ],
+                [
+                    InlineKeyboardButton("AI Advice", callback_data="ai_advice"),
+                    InlineKeyboardButton("Quiz", callback_data="quiz")
+                ],
+                [
+                    InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
+                ]
+            ]
+        )
+
+        await message.answer(
+            "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:",
+            reply_markup=keyboard
+        )
+
 @dp.callback_query()
-async def callback_handler(callback_query: CallbackQuery):
+async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     data = callback_query.data
     user = db.get_user(user_id)
@@ -79,12 +82,7 @@ async def callback_handler(callback_query: CallbackQuery):
 
     elif data == "mood":
         keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}")
-                    for emoji in ["😊","😐","😔","😡","😴"]
-                ]
-            ]
+            inline_keyboard=[[InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}") for emoji in ["😊","😐","😔","😡","😴"]]]
         )
         await bot.send_message(user_id, "How's your mood today?", reply_markup=keyboard)
 
@@ -120,6 +118,19 @@ async def callback_handler(callback_query: CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# Start polling
-if __name__ == "__main__":
+# ===================== Render Webserver =====================
+
+app = Flask("LadyBuddyBot")
+
+@app.route("/")
+def home():
+    return "LadyBuddy Bot is running!"
+
+def run_bot():
     asyncio.run(dp.start_polling(bot))
+
+threading.Thread(target=run_bot).start()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
