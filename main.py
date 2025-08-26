@@ -13,13 +13,15 @@ from modules.report import generate_weekly_report
 import asyncio
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
+
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()  # v3+ compatible
+
 db = Database('users.db')
 
 # Start command
-@dp.message_handler(commands=['start'])
+@dp.message(commands=["start"])
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     db.add_user(user_id)
@@ -31,7 +33,7 @@ async def start_handler(message: types.Message):
         InlineKeyboardButton("Mood Tracker", callback_data="mood"),
         InlineKeyboardButton("Product Reminder", callback_data="product"),
         InlineKeyboardButton("Daily Tip", callback_data="daily_tip"),
-        InlineKeyboardButton("AI Advice", callback_data="ai_advice"),  # AI button
+        InlineKeyboardButton("AI Advice", callback_data="ai_advice"),
         InlineKeyboardButton("Quiz", callback_data="quiz"),
         InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
     )
@@ -41,7 +43,7 @@ async def start_handler(message: types.Message):
     )
 
 # Callback query handler
-@dp.callback_query_handler(lambda c: True)
+@dp.callback_query(lambda c: True)
 async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     data = callback_query.data
@@ -64,7 +66,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
 
     elif data == "mood":
         keyboard = InlineKeyboardMarkup(row_width=5)
-        for emoji in ["😊","😐","😔","😡","😴"]:
+        for emoji in ["😊", "😐", "😔", "😡", "😴"]:
             keyboard.insert(InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}"))
         await bot.send_message(user_id, "How's your mood today?", reply_markup=keyboard)
 
@@ -78,7 +80,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
         edu = get_educational_content()
         await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
 
-    elif data == "ai_advice":  # AI Advice callback
+    elif data == "ai_advice":
         advice = get_ai_advice()
         await bot.send_message(user_id, f"🤖 AI Advice:\n{advice}")
 
@@ -100,12 +102,9 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# Start polling (aiogram v3.22+ compatible)
+# Start polling
 async def main():
-    # Start reminders loop
-    schedule_reminders(bot, db)
-    # Start polling
-    await dp.start_polling()
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
