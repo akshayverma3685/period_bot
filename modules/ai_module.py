@@ -1,27 +1,27 @@
 # modules/ai_module.py
 import requests
 
-# Hugging Face free inference API
-API_URL = "https://api-inference.huggingface.co/models/gpt2"  # Free GPT-2 model for text generation
-API_TOKEN = "YOUR_HUGGINGFACE_API_KEY"  # Replace with your free Hugging Face token
+# Free AI advice source using Hugging Face Inference API (no OpenAI key required)
+HF_API_URL = "https://api-inference.huggingface.co/models/gpt2"
+HF_API_TOKEN = "YOUR_HUGGINGFACE_TOKEN"  # Replace with your free Hugging Face token
 
 headers = {
-    "Authorization": f"Bearer {API_TOKEN}"
+    "Authorization": f"Bearer {HF_API_TOKEN}"
 }
 
-def get_ai_advice(prompt="How can I feel better during my period?"):
+def get_ai_advice(prompt: str) -> str:
     """
-    Generate AI-based advice for user using Hugging Face Inference API.
+    Get AI-based advice based on user's input.
+    For example: prompt can be 'cramps' or 'mood low'.
     """
-    payload = {"inputs": prompt}
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=10)
-        response.raise_for_status()
-        result = response.json()
-        if isinstance(result, list) and "generated_text" in result[0]:
-            return result[0]["generated_text"]
-        elif isinstance(result, dict) and "error" in result:
-            return "🤖 AI temporarily unavailable. Please try again later."
-        return str(result)
+        payload = {"inputs": prompt}
+        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            # GPT-2 returns text under data[0]['generated_text']
+            return data[0]['generated_text'] if data else "Here’s some advice: Take rest and stay hydrated!"
+        else:
+            return "AI service is unavailable. Try again later."
     except Exception as e:
-        return "🤖 AI service error. Try again later."
+        return f"Error fetching AI advice: {str(e)}"
