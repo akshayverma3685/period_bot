@@ -1,10 +1,12 @@
+# main.py
+
+import asyncio
+import threading
+import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import logging
-import asyncio
-from threading import Thread
-from flask import Flask
 
+# Import your modules
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -15,21 +17,32 @@ from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
 
-API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
+from flask import Flask
+
+# ---------------------------
+# Flask app for health check
+# ---------------------------
+app = Flask("LadyBuddyBot")
+
+@app.route("/")
+def home():
+    return "Bot is running!"
+
+# ---------------------------
+# Bot setup
+# ---------------------------
+API_TOKEN = "8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg"
 
 logging.basicConfig(level=logging.INFO)
+
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()  # Correct for Aiogram v3
+dp = Dispatcher()  # <- no argument here
+
 db = Database('users.db')
 
-# Flask app
-app = Flask("LadyBuddyBot")
-@app.route("/")
-def index():
-    return "Bot is running! ✅"
-
-# --- Aiogram Handlers ---
-
+# ---------------------------
+# Handlers
+# ---------------------------
 @dp.message()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
@@ -113,15 +126,24 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# --- Runner ---
+# ---------------------------
+# Run Flask in background
+# ---------------------------
+def run_flask():
+    app.run(host="0.0.0.0", port=10000)
 
-async def main():
-    logging.info("Starting Aiogram polling...")
+# ---------------------------
+# Run Aiogram bot
+# ---------------------------
+async def run_bot():
+    logging.info("Bot is starting...")
     await dp.start_polling(bot)
 
+# ---------------------------
+# Main
+# ---------------------------
 if __name__ == "__main__":
-    # Run Flask in background thread
-    Thread(target=lambda: app.run(host="0.0.0.0", port=10000)).start()
-
-    # Run Aiogram in main thread
-    asyncio.run(main())
+    # Start Flask in a thread
+    threading.Thread(target=run_flask, daemon=True).start()
+    # Start bot in main thread
+    asyncio.run(run_bot())
