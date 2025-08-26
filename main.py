@@ -1,5 +1,5 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 import logging
 from modules.database import Database
 from modules.reminders import schedule_reminders
@@ -13,7 +13,6 @@ from modules.report import generate_weekly_report
 import asyncio
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
-
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
@@ -23,30 +22,42 @@ db = Database('users.db')
 
 # Start command
 @dp.message()
-async def start_handler(message: types.Message):
-    if message.text and message.text.lower() == "/start":
-        user_id = message.from_user.id
-        db.add_user(user_id)
-        keyboard = InlineKeyboardMarkup(row_width=2)
-        keyboard.add(
-            InlineKeyboardButton("Set Period", callback_data="set_period"),
-            InlineKeyboardButton("Next Period", callback_data="next_period"),
-            InlineKeyboardButton("Symptoms / Tips", callback_data="symptoms"),
-            InlineKeyboardButton("Mood Tracker", callback_data="mood"),
-            InlineKeyboardButton("Product Reminder", callback_data="product"),
-            InlineKeyboardButton("Daily Tip", callback_data="daily_tip"),
-            InlineKeyboardButton("AI Advice", callback_data="ai_advice"),
-            InlineKeyboardButton("Quiz", callback_data="quiz"),
-            InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
-        )
-        await message.answer(
-            "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:",
-            reply_markup=keyboard
-        )
+async def start_handler(message: Message):
+    user_id = message.from_user.id
+    db.add_user(user_id)
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton("Set Period", callback_data="set_period"),
+                InlineKeyboardButton("Next Period", callback_data="next_period")
+            ],
+            [
+                InlineKeyboardButton("Symptoms / Tips", callback_data="symptoms"),
+                InlineKeyboardButton("Mood Tracker", callback_data="mood")
+            ],
+            [
+                InlineKeyboardButton("Product Reminder", callback_data="product"),
+                InlineKeyboardButton("Daily Tip", callback_data="daily_tip")
+            ],
+            [
+                InlineKeyboardButton("AI Advice", callback_data="ai_advice"),
+                InlineKeyboardButton("Quiz", callback_data="quiz")
+            ],
+            [
+                InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
+            ]
+        ]
+    )
+    
+    await message.answer(
+        "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:",
+        reply_markup=keyboard
+    )
 
 # Callback query handler
 @dp.callback_query()
-async def callback_handler(callback_query: types.CallbackQuery):
+async def callback_handler(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     data = callback_query.data
     user = db.get_user(user_id)
@@ -67,9 +78,14 @@ async def callback_handler(callback_query: types.CallbackQuery):
         db.set_state(user_id, "awaiting_symptoms")
 
     elif data == "mood":
-        keyboard = InlineKeyboardMarkup(row_width=5)
-        for emoji in ["😊","😐","😔","😡","😴"]:
-            keyboard.insert(InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}"))
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}")
+                    for emoji in ["😊","😐","😔","😡","😴"]
+                ]
+            ]
+        )
         await bot.send_message(user_id, "How's your mood today?", reply_markup=keyboard)
 
     elif data == "product":
@@ -88,9 +104,9 @@ async def callback_handler(callback_query: types.CallbackQuery):
 
     elif data == "quiz":
         quiz = get_random_quiz()
-        options_keyboard = InlineKeyboardMarkup(row_width=1)
-        for opt in quiz['options']:
-            options_keyboard.insert(InlineKeyboardButton(opt, callback_data=f"quiz_{opt}_{quiz['answer']}"))
+        options_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(opt, callback_data=f"quiz_{opt}_{quiz['answer']}")] for opt in quiz['options']]
+        )
         await bot.send_message(user_id, quiz['question'], reply_markup=options_keyboard)
 
     elif data.startswith("quiz_"):
