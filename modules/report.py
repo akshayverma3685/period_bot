@@ -1,11 +1,33 @@
 # modules/report.py
-from modules.database import Database
+from datetime import datetime, timedelta
 
-def generate_weekly_report(user_id):
-    db = Database('users.db')
-    moods = db.get_last_week_moods(user_id)
-    symptoms = db.get_last_week_symptoms(user_id)
+def generate_weekly_report(user_id, db=None):
+    """
+    Generates a simple weekly report of moods and symptoms.
+    """
+    if not db:
+        return "Database not provided."
+    
+    # Fetch moods and symptoms for the last 7 days
+    try:
+        rows = db.cursor.execute(
+            "SELECT mood, symptoms FROM users WHERE user_id=?", (user_id,)
+        ).fetchall()
 
-    report = f"Moods last week: {', '.join(moods) if moods else 'No data'}\n"
-    report += f"Symptoms last week: {', '.join(symptoms) if symptoms else 'No data'}"
-    return report
+        moods = []
+        symptoms_list = []
+        for row in rows:
+            mood, symptoms = row[0], row[1]
+            if mood:
+                moods.append(mood)
+            if symptoms:
+                symptoms_list.append(symptoms)
+
+        report_text = f"📝 Weekly Report for User {user_id}\n"
+        report_text += f"- Mood entries: {', '.join(moods) if moods else 'No data'}\n"
+        report_text += f"- Symptoms recorded: {', '.join(symptoms_list) if symptoms_list else 'No data'}\n"
+
+        return report_text
+
+    except Exception as e:
+        return f"Error generating report: {e}"
