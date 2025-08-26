@@ -15,7 +15,7 @@ API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(bot)
 dp.startup.register(lambda _: logging.info("Bot is starting..."))
 
 db = Database('users.db')
