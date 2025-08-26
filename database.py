@@ -25,7 +25,6 @@ class Database:
         """)
         self.conn.commit()
 
-    # Add user if not exists
     def add_user(self, user_id):
         self.cursor.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
         self.conn.commit()
