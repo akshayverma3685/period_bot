@@ -1,5 +1,4 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
 from database import Database
@@ -11,9 +10,13 @@ from utils import calculate_next_period
 from ai_module import get_ai_advice
 from quiz import get_random_quiz
 from report import generate_weekly_report
+import os
+import asyncio
 
-API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
+# Bot token from environment variable (safer than hardcoding)
+API_TOKEN = os.getenv("API_TOKEN")
 logging.basicConfig(level=logging.INFO)
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 db = Database('users.db')
@@ -34,7 +37,10 @@ async def start_handler(message: types.Message):
         InlineKeyboardButton("Quiz", callback_data="quiz"),
         InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
     )
-    await message.answer("👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:", reply_markup=keyboard)
+    await message.answer(
+        "👋 Welcome to LadyBuddy – your all-in-one menstrual health companion! Choose an option:", 
+        reply_markup=keyboard
+    )
 
 # Callback query handler
 @dp.callback_query_handler(lambda c: True)
@@ -92,6 +98,6 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# Start polling
+# Start polling (aiogram v3.x compatible)
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(dp.start_polling())
