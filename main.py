@@ -1,12 +1,8 @@
-# main.py
-
-import asyncio
-import threading
-import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-# Import your modules
+import logging
+import threading
+import asyncio
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -16,33 +12,19 @@ from modules.utils import calculate_next_period
 from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
-
 from flask import Flask
 
-# ---------------------------
-# Flask app for health check
-# ---------------------------
-app = Flask("LadyBuddyBot")
-
-@app.route("/")
-def home():
-    return "Bot is running!"
-
-# ---------------------------
-# Bot setup
-# ---------------------------
-API_TOKEN = "8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXhXg"
+API_TOKEN = '8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXhXg'  # ✅ Your token
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()  # <- no argument here
+dp = Dispatcher()
 
 db = Database('users.db')
 
-# ---------------------------
-# Handlers
-# ---------------------------
+# --- Aiogram Handlers ---
+
 @dp.message()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
@@ -126,24 +108,20 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# ---------------------------
-# Run Flask in background
-# ---------------------------
-def run_flask():
-    app.run(host="0.0.0.0", port=10000)
+# --- Flask App for Render Healthcheck ---
+app = Flask(__name__)
 
-# ---------------------------
-# Run Aiogram bot
-# ---------------------------
-async def run_bot():
-    logging.info("Bot is starting...")
-    await dp.start_polling(bot)
+@app.route("/")
+def index():
+    return "LadyBuddy Bot is running!"
 
-# ---------------------------
-# Main
-# ---------------------------
+# --- Start Aiogram in background thread ---
+def start_bot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(dp.start_polling())
+    loop.run_forever()
+
 if __name__ == "__main__":
-    # Start Flask in a thread
-    threading.Thread(target=run_flask, daemon=True).start()
-    # Start bot in main thread
-    asyncio.run(run_bot())
+    threading.Thread(target=start_bot).start()
+    app.run(host="0.0.0.0", port=10000)
