@@ -1,19 +1,24 @@
+# modules/products.py
+import random
+
 PRODUCTS = [
-    "🌿 Eco-friendly pads: https://www.example.com/pads",
-    "🥛 Menstrual cups: https://www.example.com/cups",
-    "🩸 Tampons: https://www.example.com/tampons",
-    "🧴 Organic wet wipes: https://www.example.com/wipes"
+    "Heating pad 🌡️",
+    "Herbal tea 🍵",
+    "Menstrual cup 🩸",
+    "Pain relief patch 💊",
+    "Comfortable underwear 👙"
 ]
 
 SELF_CARE_TIPS = [
-    "💧 Drink water regularly.",
-    "🧘 Do light stretching or yoga.",
-    "🍵 Herbal teas help reduce cramps.",
-    "🛌 Get enough sleep."
+    "Take warm baths 🛁",
+    "Practice yoga stretches 🧘‍♀️",
+    "Listen to calming music 🎶",
+    "Rest when needed 😴",
+    "Eat light and nutritious meals 🥗"
 ]
 
 def get_product_suggestions():
-    return "\n".join(PRODUCTS)
+    return '\n'.join(random.sample(PRODUCTS, 3))
 
 def get_self_care_tips():
-    return "\n".join(SELF_CARE_TIPS)
+    return '\n'.join(random.sample(SELF_CARE_TIPS, 3))
