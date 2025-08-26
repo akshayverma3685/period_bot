@@ -10,6 +10,7 @@ from modules.utils import calculate_next_period
 from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
+import asyncio
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
 logging.basicConfig(level=logging.INFO)
@@ -30,7 +31,7 @@ async def start_handler(message: types.Message):
         InlineKeyboardButton("Mood Tracker", callback_data="mood"),
         InlineKeyboardButton("Product Reminder", callback_data="product"),
         InlineKeyboardButton("Daily Tip", callback_data="daily_tip"),
-        InlineKeyboardButton("AI Advice", callback_data="ai_advice"),  # AI button added
+        InlineKeyboardButton("AI Advice", callback_data="ai_advice"),  # AI button
         InlineKeyboardButton("Quiz", callback_data="quiz"),
         InlineKeyboardButton("Weekly Report", callback_data="weekly_report")
     )
@@ -100,6 +101,11 @@ async def callback_handler(callback_query: types.CallbackQuery):
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
 # Start polling (aiogram v3.22+ compatible)
+async def main():
+    # Start reminders loop
+    schedule_reminders(bot, db)
+    # Start polling
+    await dp.start_polling()
+
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(dp.start_polling())
+    asyncio.run(main())
