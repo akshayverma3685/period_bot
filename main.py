@@ -77,4 +77,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
         _, selected, answer = data.split("_")
         if selected == answer:
             await bot.send_message(user_id, "✅ Correct!")
-    else:
+    if some_condition:  # define a real condition
+    print("Yes")
+else:
+    print("No")
