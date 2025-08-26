@@ -1,10 +1,10 @@
-# main.py
-from flask import Flask
-import threading
-import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
+import asyncio
+from threading import Thread
+from flask import Flask
+
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -16,14 +16,20 @@ from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
+
 logging.basicConfig(level=logging.INFO)
-
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
-
+dp = Dispatcher()  # Correct for Aiogram v3
 db = Database('users.db')
 
-# --- Handlers ---
+# Flask app
+app = Flask("LadyBuddyBot")
+@app.route("/")
+def index():
+    return "Bot is running! ✅"
+
+# --- Aiogram Handlers ---
+
 @dp.message()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
@@ -107,21 +113,15 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# --- Run Bot in Background Thread ---
-def run_bot():
-    asyncio.run(dp.start_polling(bot))
+# --- Runner ---
 
-bot_thread = threading.Thread(target=run_bot)
-bot_thread.start()
-
-# --- Flask App for Render ---
-app = Flask("LadyBuddyBot")
-
-@app.route("/")
-def home():
-    return "LadyBuddy Bot is running ✅"
+async def main():
+    logging.info("Starting Aiogram polling...")
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    # Run Flask in background thread
+    Thread(target=lambda: app.run(host="0.0.0.0", port=10000)).start()
+
+    # Run Aiogram in main thread
+    asyncio.run(main())
