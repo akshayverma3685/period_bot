@@ -1,3 +1,5 @@
+import random
+
 SYMPTOM_TIPS = {
     "cramps": "Use a hot water bottle on your lower abdomen and do light exercise.",
     "headache": "Drink plenty of water and try relaxation techniques.",
@@ -11,8 +13,6 @@ DAILY_TIPS = [
     "Gentle exercises reduce cramps and improve mood.",
     "Track your cycle to understand your body better."
 ]
-
-import random
 
 def get_daily_tip(symptom=None):
     if symptom and symptom.lower() in SYMPTOM_TIPS:
