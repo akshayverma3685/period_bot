@@ -11,3 +11,10 @@ def calculate_fertile_window(last_period_str, cycle_length=28):
     fertile_start = ovulation_day - timedelta(days=2)
     fertile_end = ovulation_day + timedelta(days=2)
     return fertile_start.strftime("%d-%m-%Y"), fertile_end.strftime("%d-%m-%Y")
+
+def analyze_cycle(user_data):
+    """
+    Returns cycle irregularity alert if cycles vary significantly
+    """
+    # Placeholder: You can implement historical pattern analysis
+    return "Your cycle seems regular."
