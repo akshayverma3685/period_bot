@@ -23,6 +23,13 @@ class Database:
             mood TEXT
         )
         """)
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS symptoms(
+            user_id INTEGER,
+            date TEXT,
+            symptom TEXT
+        )
+        """)
         self.conn.commit()
 
     def add_user(self, user_id):
@@ -56,4 +63,13 @@ class Database:
 
     def get_mood_stats(self, user_id):
         self.cursor.execute("SELECT date, mood FROM moods WHERE user_id=?", (user_id,))
+        return self.cursor.fetchall()
+
+    def add_symptom(self, user_id, symptom):
+        today = datetime.now().strftime("%Y-%m-%d")
+        self.cursor.execute("INSERT INTO symptoms(user_id, date, symptom) VALUES (?,?,?)", (user_id, today, symptom))
+        self.conn.commit()
+
+    def get_symptoms(self, user_id):
+        self.cursor.execute("SELECT date, symptom FROM symptoms WHERE user_id=?", (user_id,))
         return self.cursor.fetchall()
