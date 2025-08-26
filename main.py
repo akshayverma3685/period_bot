@@ -1,3 +1,7 @@
+# main.py
+from flask import Flask
+import threading
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import logging
@@ -10,19 +14,17 @@ from modules.utils import calculate_next_period
 from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
-from aiogram.filters import Command
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
-
 logging.basicConfig(level=logging.INFO)
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
-dp.startup.register(lambda _: logging.info("Bot is starting..."))
 
 db = Database('users.db')
 
-# Start command
-@dp.message(Command(commands=["start"]))
+# --- Handlers ---
+@dp.message()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     db.add_user(user_id)
@@ -46,7 +48,6 @@ async def start_handler(message: types.Message):
         reply_markup=keyboard
     )
 
-# Callback query handler
 @dp.callback_query()
 async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
@@ -106,7 +107,21 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# Start polling
-if __name__ == "__main__":
-    import asyncio
+# --- Run Bot in Background Thread ---
+def run_bot():
     asyncio.run(dp.start_polling(bot))
+
+bot_thread = threading.Thread(target=run_bot)
+bot_thread.start()
+
+# --- Flask App for Render ---
+app = Flask("LadyBuddyBot")
+
+@app.route("/")
+def home():
+    return "LadyBuddy Bot is running ✅"
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
