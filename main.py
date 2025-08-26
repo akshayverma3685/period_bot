@@ -10,18 +10,19 @@ from modules.utils import calculate_next_period
 from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
+from aiogram.filters import Command
 
 API_TOKEN = '8418079716:AAGFB4SmVKq8DMzbNwz9Qlnr-Da4FAKv0sg'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 dp.startup.register(lambda _: logging.info("Bot is starting..."))
 
 db = Database('users.db')
 
 # Start command
-@dp.message()
+@dp.message(Command(commands=["start"]))
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     db.add_user(user_id)
@@ -108,4 +109,4 @@ async def callback_handler(callback_query: types.CallbackQuery):
 # Start polling
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(dp.start_polling())
+    asyncio.run(dp.start_polling(bot))
