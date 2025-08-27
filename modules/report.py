@@ -1,4 +1,3 @@
-# modules/report.py
 from datetime import datetime, timedelta
 
 def generate_weekly_report(user_id, db=None):
@@ -8,7 +7,6 @@ def generate_weekly_report(user_id, db=None):
     if not db:
         return "Database not provided."
     
-    # Fetch moods and symptoms for the last 7 days
     try:
         rows = db.cursor.execute(
             "SELECT mood, symptoms FROM users WHERE user_id=?", (user_id,)
