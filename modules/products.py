@@ -1,5 +1,3 @@
-# modules/products.py
-
 def get_product_suggestions() -> str:
     """
     Return a list of recommended menstrual health products.
