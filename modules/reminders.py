@@ -1,4 +1,3 @@
-# modules/reminders.py
 import asyncio
 from datetime import datetime, timedelta
 
@@ -26,7 +25,6 @@ def schedule_reminders(bot, db):
                         last_date = datetime.strptime(last_period, "%d-%m-%Y")
                         next_period = last_date + timedelta(days=cycle_length)
                         today = datetime.now()
-                        # Send reminder 2 days before period
                         if 0 <= (next_period - today).days <= 2:
                             await send_period_reminder(bot, user_id, "Your period is coming soon! 🌸")
                     except:
