@@ -1,8 +1,8 @@
-from flask import Flask, request
-import logging
 import asyncio
+import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -13,16 +13,13 @@ from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
 
-API_TOKEN = '8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXhXg'
-WEBHOOK_PATH = f"/webhook/{API_TOKEN}"
-WEBHOOK_URL = f"https://<YOUR-REPLIT-URL>{WEBHOOK_PATH}"  # Replit URL daalna
+API_TOKEN = "8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXg"
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
-
-db = Database('users.db')
+dp = Dispatcher(bot)  # Aiogram 3.0 style
+db = Database("users.db")
 
 # --- Handlers ---
 
@@ -61,8 +58,8 @@ async def callback_handler(callback_query: types.CallbackQuery):
         db.set_state(user_id, "awaiting_period")
 
     elif data == "next_period":
-        if user.get('last_period') and user.get('cycle_length'):
-            next_period = calculate_next_period(user['last_period'], user['cycle_length'])
+        if user.get("last_period") and user.get("cycle_length"):
+            next_period = calculate_next_period(user["last_period"], user["cycle_length"])
             await bot.send_message(user_id, f"Your next period is expected on: {next_period}")
         else:
             await bot.send_message(user_id, "Please set your period first.")
@@ -73,7 +70,8 @@ async def callback_handler(callback_query: types.CallbackQuery):
 
     elif data == "mood":
         keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}") for emoji in ["😊","😐","😔","😡","😴"]]]
+            inline_keyboard=[[InlineKeyboardButton(emoji, callback_data=f"mood_{emoji}") 
+                              for emoji in ["😊","😐","😔","😡","😴"]]]
         )
         await bot.send_message(user_id, "How's your mood today?", reply_markup=keyboard)
 
@@ -94,9 +92,10 @@ async def callback_handler(callback_query: types.CallbackQuery):
     elif data == "quiz":
         quiz = get_random_quiz()
         options_keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(opt, callback_data=f"quiz_{opt}_{quiz['answer']}")] for opt in quiz['options']]
+            inline_keyboard=[[InlineKeyboardButton(opt, callback_data=f"quiz_{opt}_{quiz['answer']}")] 
+                             for opt in quiz["options"]]
         )
-        await bot.send_message(user_id, quiz['question'], reply_markup=options_keyboard)
+        await bot.send_message(user_id, quiz["question"], reply_markup=options_keyboard)
 
     elif data.startswith("quiz_"):
         _, selected, answer = data.split("_")
@@ -109,26 +108,8 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# --- Flask app for webhook ---
 
-app = Flask("")
-
-@app.route("/")
-def home():
-    return "Bot is running!"
-
-@app.route(WEBHOOK_PATH, methods=["POST"])
-def webhook():
-    update = types.Update(**request.json)
-    asyncio.run(dp.feed_update(bot, update))
-    return {"ok": True}
-
+# --- Start Polling ---
 if __name__ == "__main__":
-    # Set webhook
-    async def on_startup():
-        await bot.delete_webhook()
-        await bot.set_webhook(WEBHOOK_URL)
-        logging.info(f"Webhook set to {WEBHOOK_URL}")
-
-    asyncio.run(on_startup())
-    app.run(host="0.0.0.0", port=3000)
+    print("Bot is running...")
+    asyncio.run(dp.start_polling())
