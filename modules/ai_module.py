@@ -1,7 +1,7 @@
 import requests
 
 HF_API_URL = "https://api-inference.huggingface.co/models/gpt2"
-HF_API_TOKEN = "YOUR_HUGGINGFACE_TOKEN"  # Replace with your Hugging Face token
+HF_API_TOKEN = "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"  # Replace with your Hugging Face token
 
 headers = {
     "Authorization": f"Bearer {HF_API_TOKEN}"
