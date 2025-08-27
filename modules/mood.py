@@ -1,4 +1,3 @@
-# modules/mood.py
 from modules.database import Database
 
 db = Database()
@@ -7,14 +6,11 @@ def add_mood(user_id: int, mood_emoji: str) -> str:
     """
     Save user's mood and return an acknowledgment message.
     """
-    # Get existing moods
     user = db.get_user(user_id)
     previous_mood = user.get("mood", "")
     
-    # Update mood in database
     db.update_user(user_id, mood=mood_emoji)
     
-    # Return response
     mood_messages = {
         "😊": "Great to see you happy! Keep smiling 😄",
         "😐": "Feeling neutral today? Take some time for yourself!",
