@@ -1,8 +1,7 @@
 📱 Next-Level All-in-One Period Bot
 
 Description:
-Ye Telegram bot specially women’s health ke liye design kiya gaya hai. Isme period tracking, mood & symptom logging, AI-based advice, daily reminders, product suggestions, quizzes, educational content, aur weekly reports sab included hai. Bot fully modular, clean, aur free AI integration ke saath aata hai.
-
+A Telegram bot designed for women’s health. It offers period tracking, mood & symptom logging, AI-powered advice, reminders, product suggestions, quizzes, educational content, and weekly reports. The bot is modular, user-friendly, and comes with free AI integration.
 
 ---
 
@@ -78,8 +77,8 @@ Helps track cycle patterns
 
 
 
-git clone https://github.com/yourusername/period_bot_advanced.git
-cd period_bot_advanced
+git clone https://github.com/akshayverma3685/period_bot.git
+cd period_bot
 
 2. Install dependencies:
 
@@ -90,8 +89,8 @@ pip install aiogram requests
 3. Add your Telegram Bot Token in main.py:
 
 
-
-API_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
+Before running the bot, replace `YOUR_BOT_TOKEN_HERE` with your Telegram bot token.
+Replace `YOUR_HF_TOKEN_HERE` with your Hugging Face API token.
 
 
 ---
@@ -177,6 +176,7 @@ Historical pattern analytics for irregular cycles
 More AI-powered lifestyle & diet suggestions
 
 ---
+👉 This is an advanced bot, and anyone is free to modify or contribute to improve it.
 
 ⚖️ License
 
