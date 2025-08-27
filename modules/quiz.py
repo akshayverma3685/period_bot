@@ -1,7 +1,5 @@
-# modules/quiz.py
 import random
 
-# Sample quizzes
 QUIZZES = [
     {
         "question": "Which nutrient is important to include during your period?",
