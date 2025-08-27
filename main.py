@@ -1,7 +1,8 @@
+import asyncio
 import logging
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import asyncio
 
 # --- Import your modules ---
 from modules.database import Database
@@ -17,14 +18,15 @@ from modules.report import generate_weekly_report
 # --- Logging ---
 logging.basicConfig(level=logging.INFO)
 
-# --- Telegram Bot token (teri wali key) ---
+# --- Telegram Bot token ---
 API_TOKEN = "8247111109:AAFXtTZ9ChI2L4Dvvb7VwbwW9VUeyOX7XkY"
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 db = Database("users.db")
 
 # --- Start command ---
-@dp.message()
+@dp.message_handler(commands=["start"])
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
     db.add_user(user_id)
@@ -49,7 +51,7 @@ async def start_handler(message: types.Message):
     )
 
 # --- Callback handler ---
-@dp.callback_query()
+@dp.callback_query_handler()
 async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     data = callback_query.data
@@ -89,7 +91,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
 
         elif data == "ai_advice":
-            advice = get_ai_advice("Give me some advice for today")
+            advice = get_ai_advice("I need advice")
             await bot.send_message(user_id, f"🤖 AI Advice:\n{advice}")
 
         elif data == "quiz":
@@ -114,7 +116,10 @@ async def callback_handler(callback_query: types.CallbackQuery):
     except Exception as e:
         await bot.send_message(user_id, f"Error: {str(e)}")
 
-# --- Entry Point ---
+# --- Main runner for Termux ---
+async def main():
+    logging.info("Bot is starting... ✅")
+    await dp.start_polling(bot)
+
 if __name__ == "__main__":
-    print("🤖 Bot is running... Press Ctrl+C to stop.")
-    asyncio.run(dp.start_polling(bot))
+    asyncio.run(main())
