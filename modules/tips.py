@@ -1,7 +1,5 @@
-# modules/tips.py
 import random
 
-# Daily tips for menstrual health
 DAILY_TIPS = [
     "💧 Stay hydrated to ease cramps and bloating.",
     "🥗 Include iron-rich foods like spinach and nuts in your diet.",
@@ -10,7 +8,6 @@ DAILY_TIPS = [
     "🧘‍♀️ Practice deep breathing or meditation for stress relief."
 ]
 
-# Educational facts
 EDUCATIONAL_CONTENT = [
     "📚 Menstrual cycles are usually 28 days but can vary between 21-35 days.",
     "📚 PMS symptoms are normal and can include mood swings, cramps, and fatigue.",
