@@ -18,11 +18,10 @@ API_TOKEN = "8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXg"
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)  # Aiogram 3.0 style
+dp = Dispatcher(bot)
 db = Database("users.db")
 
 # --- Handlers ---
-
 @dp.message()
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
@@ -108,8 +107,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-
 # --- Start Polling ---
 if __name__ == "__main__":
     print("Bot is running...")
-    asyncio.run(dp.start_polling())
+    asyncio.run(dp.start_polling(bot))
