@@ -1,8 +1,7 @@
-import asyncio
 import logging
-from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import asyncio
 
 # --- Import your modules ---
 from modules.database import Database
@@ -18,7 +17,7 @@ from modules.report import generate_weekly_report
 # --- Logging ---
 logging.basicConfig(level=logging.INFO)
 
-# --- Telegram Bot token ---
+# --- Telegram Bot token (teri wali key) ---
 API_TOKEN = "8247111109:AAFXtTZ9ChI2L4Dvvb7VwbwW9VUeyOX7XkY"
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -90,7 +89,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
 
         elif data == "ai_advice":
-            advice = get_ai_advice("I feel tired today")  # Dummy input
+            advice = get_ai_advice("Give me some advice for today")
             await bot.send_message(user_id, f"🤖 AI Advice:\n{advice}")
 
         elif data == "quiz":
@@ -115,26 +114,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
     except Exception as e:
         await bot.send_message(user_id, f"Error: {str(e)}")
 
-# --- Dummy web server for Koyeb ---
-async def handle_root(request):
-    return web.Response(text="Bot is running on Koyeb 🚀")
-
-app = web.Application()
-app.router.add_get("/", handle_root)
-
-async def start_web_app():
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", 8080)  # Koyeb expects port 8080
-    await site.start()
-
-# --- Start bot and server together ---
-async def main():
-    await asyncio.gather(
-        start_web_app(),   # Web server
-        dp.start_polling(bot)  # Bot polling
-    )
-
+# --- Entry Point ---
 if __name__ == "__main__":
-    print("🚀 Starting bot on Koyeb...")
-    asyncio.run(main())
+    print("🤖 Bot is running... Press Ctrl+C to stop.")
+    asyncio.run(dp.start_polling(bot))
