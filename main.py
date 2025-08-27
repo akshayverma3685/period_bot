@@ -4,7 +4,6 @@ from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# --- Import your modules ---
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -15,17 +14,14 @@ from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
 
-# --- Logging ---
 logging.basicConfig(level=logging.INFO)
 
-# --- Telegram Bot token ---
-API_TOKEN = "8247111109:AAFXtTZ9ChI2L4Dvvb7VwbwW9VUeyOX7XkY"
+API_TOKEN = "telegram bot token"
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 db = Database("users.db")
 
-# --- Start command ---
 @dp.message_handler(commands=["start"])
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
@@ -50,7 +46,6 @@ async def start_handler(message: types.Message):
         reply_markup=keyboard
     )
 
-# --- Callback handler ---
 @dp.callback_query_handler()
 async def callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
@@ -116,7 +111,6 @@ async def callback_handler(callback_query: types.CallbackQuery):
     except Exception as e:
         await bot.send_message(user_id, f"Error: {str(e)}")
 
-# --- Main runner for Termux ---
 async def main():
     logging.info("Bot is starting... ✅")
     await dp.start_polling(bot)
