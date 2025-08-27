@@ -1,4 +1,3 @@
-# modules/database.py
 import sqlite3
 from datetime import datetime
 
@@ -43,7 +42,7 @@ class Database:
         self.conn.commit()
 
     def set_state(self, user_id, state):
-        self.update_user(user_id, mood=state)  # temporary use mood field for state
+        self.update_user(user_id, mood=state)
 
     def get_state(self, user_id):
         user = self.get_user(user_id)
