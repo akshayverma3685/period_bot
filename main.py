@@ -90,7 +90,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, f"💡 Daily Tip:\n{tip}\n📚 Fact:\n{edu}")
 
         elif data == "ai_advice":
-            advice = get_ai_advice()
+            advice = get_ai_advice("I feel tired today")  # Dummy input
             await bot.send_message(user_id, f"🤖 AI Advice:\n{advice}")
 
         elif data == "quiz":
@@ -115,11 +115,9 @@ async def callback_handler(callback_query: types.CallbackQuery):
     except Exception as e:
         await bot.send_message(user_id, f"Error: {str(e)}")
 
-# --- Dummy web server for Render free plan ---
-PORT = 10000
-
+# --- Dummy web server for Koyeb ---
 async def handle_root(request):
-    return web.Response(text="Bot is running...")
+    return web.Response(text="Bot is running on Koyeb 🚀")
 
 app = web.Application()
 app.router.add_get("/", handle_root)
@@ -127,14 +125,16 @@ app.router.add_get("/", handle_root)
 async def start_web_app():
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    site = web.TCPSite(runner, "0.0.0.0", 8080)  # Koyeb expects port 8080
     await site.start()
 
-# --- Start bot and dummy server ---
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(dp.start_polling(bot))
+# --- Start bot and server together ---
+async def main():
+    await asyncio.gather(
+        start_web_app(),   # Web server
+        dp.start_polling(bot)  # Bot polling
+    )
 
 if __name__ == "__main__":
-    print("Bot is running... ✅")
+    print("🚀 Starting bot on Koyeb...")
     asyncio.run(main())
