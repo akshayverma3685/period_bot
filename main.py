@@ -1,12 +1,9 @@
-# main.py
 import asyncio
 import logging
-import threading
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from flask import Flask
 
-# --- Modules (Ensure these exist) ---
+# --- Import your modules ---
 from modules.database import Database
 from modules.reminders import schedule_reminders
 from modules.tips import get_daily_tip, get_educational_content
@@ -17,13 +14,14 @@ from modules.ai_module import get_ai_advice
 from modules.quiz import get_random_quiz
 from modules.report import generate_weekly_report
 
-# --- Configuration ---
-API_TOKEN = "8427135238:AAGOm7Pq09WCWzzCdy08DmGLyKRFA1hXg"
+# --- Bot token ---
+API_TOKEN = "8247111109:AAFXtTZ9ChI2L4Dvvb7VwbwW9VUeyOX7XkY"
 
 logging.basicConfig(level=logging.INFO)
 
+# --- Initialize bot and dispatcher ---
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()  # Aiogram 3.x style
 db = Database("users.db")
 
 # --- Handlers ---
@@ -112,19 +110,7 @@ async def callback_handler(callback_query: types.CallbackQuery):
         report = generate_weekly_report(user_id)
         await bot.send_message(user_id, f"📊 Your weekly report:\n{report}")
 
-# --- Flask Ping App for Free Hosts ---
-app = Flask("")
-
-@app.route("/")
-def home():
-    return "Bot is running!"
-
-def run_flask():
-    app.run(host="0.0.0.0", port=3000)
-
-threading.Thread(target=run_flask).start()
-
-# --- Start Polling ---
+# --- Start polling ---
 if __name__ == "__main__":
-    print("Bot is running...")
-    asyncio.run(dp.start_polling())
+    print("Bot is running... ✅")
+    asyncio.run(dp.start_polling(bot))
