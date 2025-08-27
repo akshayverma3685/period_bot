@@ -3,7 +3,6 @@ import logging
 from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils import executor
 
 # --- Import your modules ---
 from modules.database import Database
@@ -132,9 +131,9 @@ async def start_web_app():
     await site.start()
 
 # --- Start bot and dummy server ---
-async def main():
-    await start_web_app()
-    executor.start_polling(dp, skip_updates=True)
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(dp.start_polling(bot))
 
 if __name__ == "__main__":
     print("Bot is running... ✅")
